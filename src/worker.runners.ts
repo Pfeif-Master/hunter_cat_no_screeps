@@ -1,39 +1,16 @@
 import {BaseWorker} from 'baseWorker'
 
-// enum E_delivery_state{LOAD, UNLOAD}
-// enum E_spawern_state{GREE, RED}
-
 class Role_Runner extends BaseWorker{
-    spawn_bins: StructureSpawn[] | StructureExtension[];
-    towers: StructureTower[];
-    roleMem;
-
-
-    //Role vars
-    // delivery_source;
-    // delivery_dest;
-    // logistic_path;
-    // delivery_state: E_delivery_state;
-    // spawner_state: E_spawern_state;
+    blackList: string[];
 
     constructor(creep: Creep, depo?: Flag){
         super(creep, depo);
-
-        //load
-        //this.roleMem = this.memory.roleMem;
-        //if(this.roleMem == undefined){
-        //    //FIXME
-        //}
-
-
-        // if(this.logistic_source == undefined){}
-        // if(this.logistic_dest == undefined){}
-        // if(this.logistic_path == undefined){}
-        // if(this.delivery_state == undefined){
-        //     this.delivery_state=E_delivery_state.LOAD
-        // }
-        // if(this.spawner_state == undefined){
-        // }
+        if(this.memory.blackList){
+            this.blackList = this.memory.blackList;
+        }
+        else{
+            this.blackList = [];
+        }
     }
 
     run(){
@@ -47,7 +24,6 @@ class Role_Runner extends BaseWorker{
             //Find a energy source
             this.delivery_load();
         }
-        // this.save();
     }
 
     check_spawn_bins():Boolean{
@@ -69,6 +45,7 @@ class Role_Runner extends BaseWorker{
                     return false;
                 }
             });
+            _.remove(targs,this.blackList);
             this.resupply_act(this.pos.findClosestByPath(targs));
         }
     }
@@ -96,13 +73,6 @@ class Role_Runner extends BaseWorker{
                 dest = this.room.storage;
             }
 
-            //Look for container
-            // if(!dest){
-            //     dest = creep.pos.findClosestByPath(FIND_STRUCTURES,{filter:(s)=>
-            //         s.structureType == STRUCTURE_CONTAINER &&
-            //         s.store[RESOURCE_ENERGY] < 2000});
-            // }
-
             //if still no quit
             if(!dest){
                 this.goToDepo();
@@ -114,8 +84,23 @@ class Role_Runner extends BaseWorker{
             this.moveTo(dest);
         }
     }
+}
 
-    // save(){this.memory.roleMem = this.roleMem;}
+class Role_Logistic extends BaseWorker{
+    src: Structure;
+    dest: Structure
+
+    constructor(creep: Creep, depo?: Flag){
+        super(creep);
+        this.src = Game.getObjectById(this.memory.srcID);
+        this.dest = Game.getObjectById(this.memory.destID);
+    }
+
+    run(){
+        if(!this.creep){return}
+        if(!this.src){return}
+        if(!this.dest){return}
+    }
 }
 
 export {Role_Runner}

@@ -11,6 +11,14 @@ interface RoomMemory {
                 body: BodyManifest;
             };
         };
+        Logistics:
+            {
+                srcID: string;
+                destID: string;
+                creepName: string;
+                bosy: BodyManifest;
+            }[];
+        
         Runners:{
             blackList: string[];
             job: Job;

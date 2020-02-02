@@ -31,6 +31,7 @@ class RoomMind {
         this.run_away_builders();
         this.run_builders();
         this.run_wallBuilders();
+        this.run_logistics();
         this.run_fixers();
         this.run_upgraders();
         this.run_harvesters();
@@ -62,6 +63,9 @@ class RoomMind {
             i++
             Memory.activeCreeps.add(job.creepName);
         }
+    }
+
+    run_logistics(){
     }
 
     run_runners(){
