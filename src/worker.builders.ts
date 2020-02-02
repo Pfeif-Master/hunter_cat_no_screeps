@@ -1,8 +1,8 @@
 import {BaseWorker} from 'baseWorker'
 
 class Role_Fixer extends BaseWorker{
-    constructor(creep:Creep){
-        super(creep);
+    constructor(creep:Creep, depo:Flag){
+        super(creep, depo);
     }
 
     run(){
@@ -31,34 +31,51 @@ class Role_Fixer extends BaseWorker{
 }
 
 class Role_Builder extends BaseWorker{
-    constructor(creep: Creep){
-        super(creep);
+    targRoom: Room;
+
+    constructor(creep: Creep, depo:Flag){
+        super(creep, depo);
+        if(!this.memory.roomName){
+            this.targRoom = this.room;
+        }
+        else{
+            this.targRoom = Game.rooms[this.memory.roomName];
+        }
     }
 
     run(){
         if(!this.creep){return}
+        if(!this.targRoom){return}
         this.fullFlip();
         if (this.memory.FULL) {
             //Look for low ramparts
             let targs;
             let targ;
-            targs = this.room.find(FIND_STRUCTURES, {filter: (s)=>
+            targs = this.targRoom.find(FIND_STRUCTURES, {filter: (s)=>
                 s.structureType == STRUCTURE_RAMPART &&
                 s.hits < 1200});
             targ = this.pos.findClosestByPath(targs);
             if(!targ){
                 //Find smallest construction
-                targs = this.room.find(FIND_CONSTRUCTION_SITES);
+                // console.log(this.targRoom);
+                targs = this.targRoom.find(FIND_CONSTRUCTION_SITES);
                 targs.sort((a:ConstructionSite, b:ConstructionSite) =>
                     a.progressTotal - b.progressTotal);
+                // console.log(targs);
                 targ = this.pos.findClosestByPath(targs);
+                // console.log('final targ: '+targ);
 
                 if (!targ) {
-                    this.goToDepo();
-                    return;
+                    if(this.room != this.targRoom){
+                        this.changeRooms(this.targRoom);
+                    }
+                    else{
+                        this.goToDepo();
+                        return;
+                    }
                 }
             }
-            
+
             let err;
             if(targ instanceof StructureRampart){
                 err = this.creep.repair(targ)
@@ -76,9 +93,9 @@ class Role_Builder extends BaseWorker{
     }
 }
 
-class Role_WallBuiler extends BaseWorker{
-    constructor(creep: Creep){
-        super(creep);
+class Role_WallBuilder extends BaseWorker{
+    constructor(creep: Creep, depo:Flag){
+        super(creep, depo);
     }
 
     run(){
@@ -108,8 +125,9 @@ class Role_WallBuiler extends BaseWorker{
 
             //find wall
             let walls = this.room.find(FIND_STRUCTURES, {filter: (s) =>
-                s.structureType == STRUCTURE_WALL ||
-                    s.structureType == STRUCTURE_RAMPART});
+                (s.structureType == STRUCTURE_WALL ||
+                s.structureType == STRUCTURE_RAMPART) &&
+                s.pos.x != 0 && s.pos.x != 49 && s.pos.y != 0 && s.pos.y != 49});
             walls.sort((a,b) => a.hits - b.hits);
             this.memory.targID = walls[0].id;
         }
@@ -119,5 +137,5 @@ class Role_WallBuiler extends BaseWorker{
 export {
     Role_Fixer,
     Role_Builder,
-    Role_WallBuiler
+    Role_WallBuilder
 }

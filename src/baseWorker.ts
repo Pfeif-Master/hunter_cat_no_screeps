@@ -1,21 +1,27 @@
 import {Finders} from 'finders'
 
+interface IBaseWorker{
+    new (creep: Creep, depo?: Flag): BaseWorker;
+}
+
 class BaseWorker{
     creep: Creep;
     memory;
     room: Room;
     pos: RoomPosition;
+    depo: Flag;
     // dest: Structure|Source|ConstructionSite|Flag|Resource;
     run(): void{
         if(!this.creep){return}}
 
-    constructor(creep: Creep){
+    constructor(creep: Creep, depo?:Flag){
         if(creep){
             this.creep = creep;
             this.memory = creep.memory;
             this.room = creep.room;
             this.pos = creep.pos;
             if(this.memory.FULL == undefined){this.memory.FULL = false;}
+            this.depo = depo
         }
     }
 
@@ -33,7 +39,7 @@ class BaseWorker{
 
     goToDepo(){
         this.creep.say('NOOP');
-        this.creep.moveTo(Game.flags['Depo']);
+        this.creep.moveTo(this.depo);
     }
 
     fullFlip(){
@@ -58,10 +64,12 @@ class BaseWorker{
         if(ground){targs.push(ground);}
         let box = Finders.find_closet_full_container(this.creep);
         if(box){targs.push(box);}
-        if(this.room.storage.store.getUsedCapacity(RESOURCE_ENERGY) >
-            this.creep.store.getCapacity()){
+        if(this.room.storage){
+            if(this.room.storage.store.getUsedCapacity(RESOURCE_ENERGY) >
+                this.creep.store.getCapacity()){
 
-            targs.push(this.room.storage);
+                targs.push(this.room.storage);
+            }
         }
         return targs;
     }
@@ -90,9 +98,9 @@ class BaseWorker{
         }
     }
 
-    log(msg: string){
+    log(msg){
         console.log(this.room.name+'> '+this.creep.name+': '+msg);
     }
 }
 
-export {BaseWorker}
+export {BaseWorker, IBaseWorker}

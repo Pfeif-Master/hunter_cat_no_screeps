@@ -3,26 +3,47 @@
 // memory extension samples
 interface CreepMemory { [key: string]: any }
 
-interface RoomMemory {roster: {force}}
-
-interface Memory { [key: string]: any }
-
-interface Roster {
-    [forceName: string]: {
-        qnt: Number;
-        body: {
-            move?: Number;
-            work?: Number;
-            carry?: Number;
-            attack?: Number;
-            ranged_attack?:Number;
-            heal?: Number;
-            claim?: Number;
-            tough?: Number;
+interface RoomMemory {
+    jobs:{
+        Harvesters:{
+            [id: string]:{
+                creepName: string;
+                body: BodyManifest;
+            };
         };
-        role: string;
-        args?: any;
-    }
+        Runners:{
+            blackList: string[];
+            job: Job;
+        };
+        Upgraders:Job;
+        Builders:Job;
+        AwayBuilders:{
+            roomName:string;
+            job:Job;
+        };
+        WallBuilders:Job;
+        Fixers:Job;
+    };
+    Claim:string;
+    Scouts:string[];
+}
+
+interface Memory { 
+    // activeCreeps: {[key: string]: any};
+    // activeCreeps: string[];
+    activeCreeps: Set<string>;
+    [key: string]: any }
+
+interface BodyManifest{
+    move?: number;
+    carry?: number;
+    work?: number;
+    claim?: number;
+}
+
+interface Job{
+    qnt: number;
+    body: BodyManifest;
 }
 
 // `global` extension samples
@@ -31,3 +52,22 @@ declare namespace NodeJS {
         log: any;
     }
 }
+
+// interface Roster {
+//     [forceName: string]: {
+//         qnt: number;
+//         body: {
+//             move?: number;
+//             work?: number;
+//             carry?: number;
+//             attack?: number;
+//             ranged_attack?:number;
+//             heal?: number;
+//             claim?: number;
+//             tough?: number;
+//         };
+//         role: string;
+//         args?: any;
+//     }
+// }
+

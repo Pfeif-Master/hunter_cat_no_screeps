@@ -1,23 +1,31 @@
 import {BaseWorker} from 'baseWorker'
 
-class Role_Harveser extends BaseWorker{
+class Role_Harvester extends BaseWorker{
     src: Source;
-    constructor(creep:Creep, srcID: string){
-        super(creep);
-        this.src = Game.getObjectById(srcID);
+    constructor(creep:Creep, depo?:Flag){
+        super(creep, depo);
+        this.src = Game.getObjectById(this.creep.memory.srcID);
     }
 
     run(){
         if(!this.creep){return}
+        if(!this.src){
+            this.log('ERR: can\'t find Source');
+            return;
+        }
         //Try to find container
         if(!this.memory.on_container){
             let container;
             container = this.src.pos.findInRange(FIND_STRUCTURES,1,{filter:(s:Structure)=>
                 s.structureType == STRUCTURE_CONTAINER})[0];
-            if(!container){this.dig();}
-            if(container){this.creep.moveTo(container);}
-            if(this.creep.pos.isEqualTo(container.pos)){
-                this.memory.on_container = true;
+            if(!container){
+                this.dig();
+            }
+            else{
+                this.creep.moveTo(container);
+                if(this.creep.pos.isEqualTo(container.pos)){
+                    this.memory.on_container = true;
+                }
             }
         }
         else{this.dig();}
@@ -35,8 +43,8 @@ class Role_LDH extends BaseWorker{
     workRoom: string;
     srcID: string;
 
-    constructor(creep:Creep, args:{destID, room, srcID}){
-        super(creep);
+    constructor(creep:Creep, depo:Flag, args:{destID, room, srcID}){
+        super(creep, depo);
         this.dest = Game.getObjectById(args.destID);
         this.workRoom = args.room;
         this.srcID = args.srcID;
@@ -82,6 +90,6 @@ class Role_LDH extends BaseWorker{
 }
 
 export {
-    Role_Harveser,
+    Role_Harvester,
     Role_LDH
 }

@@ -1,5 +1,6 @@
 import { ErrorMapper } from "utils/ErrorMapper";
-import {run_roster, recycle} from "roster"
+// import {run_roster, recycle} from "roster"
+import {RoomMind} from 'RoomMind'
 
 // When compiling TS to JS and bundling with rollup, the line numbers and file names in error messages change
 // This utility uses source maps to get the line numbers and file names of the original, TS source code
@@ -12,21 +13,25 @@ export const loop = ErrorMapper.wrapLoop(() => {
             delete Memory.creeps[name];
         }
     }
+    Memory.activeCreeps = new Set();
 
-    let spawn: StructureSpawn = Game.getObjectById('5e24c58dbe0a852ccdecda34');
-    let room = spawn.room
-    let s0 = room.find(FIND_SOURCES)[0];
-    let s1 = room.find(FIND_SOURCES)[1];
-    // let tower:StructureTower = Game.getObjectById('5e27c9366e043f4b459bde1e');
-    let roster = Memory.rooms[room.name].roster;
+    new RoomMind('W1S33', Game.flags['Depo']).tick();
+    new RoomMind('W2S33', Game.flags['Depo2']).tick();
 
-    run_roster(roster, spawn);
-    recycle(spawn);
-
-    for(let tower of room.find(FIND_MY_STRUCTURES,{filter: (s)=>
-        s.structureType==STRUCTURE_TOWER})){
-        if(tower instanceof StructureTower){
-            tower.attack(tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS));
+    for(let creepName in Game.creeps){
+        if(!Memory.activeCreeps.has(creepName)){
+            let spawner = Game.creeps[creepName].pos.findClosestByPath(FIND_MY_SPAWNS);
+            if(!spawner){
+                console.log("Can't kill zombi: "+creepName);
+                continue;
+            }
+            console.log("Found Zombi: "+creepName);
+            let creep = Game.creeps[creepName]
+            creep.moveTo(spawner);
+            if(!spawner.spawning){
+                spawner.recycleCreep(creep);
+            }
         }
     }
+
 });

@@ -16,8 +16,8 @@ class Role_Runner extends BaseWorker{
     // delivery_state: E_delivery_state;
     // spawner_state: E_spawern_state;
 
-    constructor(creep: Creep){
-        super(creep);
+    constructor(creep: Creep, depo?: Flag){
+        super(creep, depo);
 
         //load
         //this.roleMem = this.memory.roleMem;

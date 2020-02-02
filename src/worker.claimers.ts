@@ -1,8 +1,8 @@
 import {BaseWorker} from 'baseWorker'
 
 class Role_Upgrader extends BaseWorker{
-    constructor(creep:Creep){
-        super(creep);
+    constructor(creep:Creep, depo:Flag){
+        super(creep, depo);
     }
 
     run(){
@@ -23,30 +23,55 @@ class Role_Upgrader extends BaseWorker{
     }
 }
 
-class Role_Claimer extends BaseWorker{
-    newRoomName: string;
+class Role_Scout extends BaseWorker{
+    targRoom: Room;
 
-    constructor(creep: Creep, args:{roomName:string}){
+    constructor(creep: Creep){
         super(creep);
-        this.newRoomName = args.roomName;
+        this.targRoom = Game.rooms[this.memory.roomName];
     }
 
-    claim(){
-        if(this.creep.room.name != this.newRoomName){
-            //change rooms
-            this.changeRooms(this.newRoomName);
+    run(){
+        if(this.room != this.targRoom){
+            this.changeRooms(this.memory.roomName);
             return;
         }
-        else{
-            //cliam control
-            if(this.creep.claimController(this.room.controller) == ERR_NOT_IN_RANGE){
-                this.moveTo(this.room.controller);
-            }
+        if(this.pos.x==0){
+            this.creep.move(RIGHT);
+        }
+        if(this.pos.x==49){
+            this.creep.move(LEFT);
+        }
+        if(this.pos.y==0){
+            this.creep.move(BOTTOM);
+        }
+        if(this.pos.y==49){
+            this.creep.move(TOP);
+        }
+    }
+
+    
+}
+
+
+class Role_Claimer extends Role_Scout{
+
+    constructor(creep: Creep, depo?:Flag){
+        super(creep);
+    }
+
+    run(){
+        let err = this.creep.claimController(this.targRoom.controller);
+        this.log(this.targRoom);
+        this.log(err);
+        if( err == ERR_NOT_IN_RANGE){
+            this.moveTo(this.targRoom.controller);
         }
     }
 }
 
-export {
-    Role_Upgrader,
-    Role_Claimer
-}
+    export {
+        Role_Upgrader,
+        Role_Claimer,
+        Role_Scout
+    }
